@@ -32,14 +32,42 @@ client.on("ready", () => {
 
 
 client.on("message", msg => {
-	if (msg.content == "dailyreminder") {
-		reply = ""
-		for (var i = 0; i < users.length; i++){
-			reply += "<@" + users[i] + "> "
+	content = msg.content.split(" ")
+	if (content[0] == "$track") {
+		if (validateTrack(content)){
+			msg.reply("Command is valid and track your starforcing (not implemented yet)")
+		}else{
+			msg.reply("Command is invalid; Please check if you put in your info correctly")
 		}
-		reply += "\n Daily Reminder: Remember to do your crafting, Hellux, and Cernium/Hotel"
-		msg.channel.send(reply);
+	}
+	else if (content[0] == "$help"){
+		//Display list of commands
+		if (content.length == 1){
+			msg.reply("Here are the list of commands: $track\n For more information, use $help command")
+		}else if (content.length == 2) {
+			if (content[1] == "$track") {
+				msg.reply("This command tracks the amount of resources spent on an item for a character \nFormat:   $track character_name item_name meso_spent event booms")
+			}
+		}
 	}
 })
+
+
+/**
+* Returns true or false if the content is in valid format
+*
+* @param {string} content the string being validated
+*/
+function validateTrack(content){
+	if (content.length != 6){
+		return false
+	}
+	
+	if (isNaN(content[5])){
+		return false
+	}
+	
+	return true
+}
 
 client.login(process.env.TOKEN)
