@@ -8,6 +8,7 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 var users = []
 
 client.on("ready", () => {
+	//Crafting reminder function
 	fs.readFile("users.txt", "utf8", (err,data) => {
 		if (err) {
 			console.log("Unable to retrieve users");
@@ -30,52 +31,57 @@ client.on("ready", () => {
 	console.log("The bot is ready!")
 })
 
-
+//tracking cost and pain
 client.on("message", msg => {
-	content = msg.content.split(" ")
-	if (content[0] == "$track") {
-		if (validateTrack(content)){
+	command = msg.content.split(" ");
+	//tracking
+	if (command[0] == "$track") {
+		if (validateTrack(command)){
 			msg.reply("Command is valid and track your starforcing (not implemented yet)")
 		}else{
 			msg.reply("Command is invalid; Please check if you put in your info correctly")
 		}
 	}
-	else if (content[0] == "$help"){
+	//this command gives information the other commands
+	else if (command[0] == "$help"){
 		//Display list of commands
-		if (content.length == 1){
+		//length with help command
+		if (command.length == 1){
 			msg.reply("Here are the list of commands: $track\n For more information, use $help command")
-		}else if (content.length == 2) {
-			if (content[1] == "$track") {
+		}else if (command.length == 2 ) {
+			if (command[1] == "$track") {
 				msg.reply("This command tracks the amount of resources spent on an item for a character \nFormat:   $track character_name item_name meso_spent event booms")
 			}
+			else if (command[1] == "$record"){
+				msg.reply("This command tracks the user's total spending?")
+			}
+		}
+	}
+	//looking up user's track record
+	// $record character_name_ 
+	else if (command[0] == "$record"){
+		if(command.length == 1){
+			msg.reply("")
 		}
 	}
 })
 
 
 /**
-* Returns true or false if the content is in valid format
+* Returns true or false if the command is in valid format
 *
-* @param {string} content the string being validated
+* @param {string} command the string being validated
 */
-function validateTrack(content){
-	if (content.length != 6){
+function validateTrack(command){
+	if (command.length != 6){
 		return false
 	}
 	
-	if (isNaN(content[5])){
+	if (isNaN(command[5])){
 		return false
 	}
 	
 	return true
 }
-
-client.login(process.env.TOKEN)
-
-client.on("message", msg => {
-	if (msg.content == "ping") {
-		msg.reply("pong");
-	}
-})
 
 client.login(process.env.TOKEN)
