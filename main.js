@@ -1,8 +1,17 @@
-const { Client, Intents } = require('discord.js');
-const dotenv = require("dotenv")
-const fs = require("fs")
-const cron = require("cron")
+const { Client, Intents, Message } = require('discord.js');
+const dotenv = require("dotenv");
+const fs = require("fs");
+const cron = require("cron");
+const mysql = require("mysql");
 dotenv.config()
+//connection
+var connection = mysql.createConnection({
+	host: 'localhost',
+	port: '3306',
+	user:  process.env.USER,
+	database: process.env.DATABASE,
+	password: process.env.PASSWORD
+})
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 var users = []
@@ -27,7 +36,11 @@ client.on("ready", () => {
 		});
 		job.start();
 	});
-
+	//server is connected if not error
+	connection.connect(function(err){
+		if(err)throw err;
+		console.log("success");
+	})
 	console.log("The bot is ready!")
 })
 
@@ -60,9 +73,12 @@ client.on("message", msg => {
 	//looking up user's track record
 	// $record character_name_ 
 	else if (command[0] == "$record"){
-		if(command.length == 1){
-			msg.reply("")
-		}
+		connection.query("SELECT * FROM `character`", function(err, res){
+			if(err) throw err;
+			results = JSON.parse(JSON.stringify(res));
+			// console.log(results);
+			msg.reply("ID: " + results[0].id);
+		});
 	}
 })
 
