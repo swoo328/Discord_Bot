@@ -50,7 +50,27 @@ client.on("message", msg => {
 	//tracking
 	if (command[0] == "$track") {
 		if (validateTrack(command)){
-			msg.reply("Command is valid and track your starforcing (not implemented yet)")
+			//Determine what info to put in
+			ownerId = msg.author.id
+			itemName = command[2]
+			mesoSpent = command[3]
+			sfEvent = ""
+			if (command.length <= 4){
+				sfEvent = "offevent"
+			}else{
+				sfEvent = command[4]
+			}
+			
+			//Make SQL statement
+			statement = "INSERT INTO item (owner_id, item_name, meso_spent, event) VALUES ('" + ownerId + "', '" + itemName + "', '" + mesoSpent + "', '" + sfEvent + "')"
+			
+			//Insert into Database
+			connection.query(statement, function(err, res) {
+				if (err)
+					throw err
+				msg.reply("Command is valid and is logged in the database")
+			});
+			
 		}else{
 			msg.reply("Command is invalid; Please check if you put in your info correctly")
 		}
@@ -63,7 +83,7 @@ client.on("message", msg => {
 			msg.reply("Here are the list of commands: $track\n For more information, use $help command")
 		}else if (command.length == 2 ) {
 			if (command[1] == "$track") {
-				msg.reply("This command tracks the amount of resources spent on an item for a character \nFormat:   $track character_name item_name meso_spent event booms")
+				msg.reply("This command tracks the amount of resources spent on an item for a character \nFormat:   $track character_name item_name meso_spent event")
 			}
 			else if (command[1] == "$record"){
 				msg.reply("This command tracks the user's total spending?")
@@ -89,12 +109,19 @@ client.on("message", msg => {
 * @param {string} command the string being validated
 */
 function validateTrack(command){
-	if (command.length != 6){
+	if (command.length < 4){
 		return false
 	}
 	
-	if (isNaN(command[5])){
+	if (isNaN(command[3])){
 		return false
+	}
+	
+	if (command.length == 5){
+		events = ["offevent", "5/10/15", "30%", "Shiny"]
+		if (events.indexOf(command[4]) == -1){
+			return false
+		}
 	}
 	
 	return true
