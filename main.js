@@ -102,6 +102,19 @@ client.on("message", msg => {
                 msg.reply("This command tracks the user's total spending?")
             }
         }
+        else if(command.length == 3){
+            if(command[1] = "record" && command[2] == "$character"){
+                msg.reply("This command tracks the user's characters and the amount of meso spent for each character");
+            }
+            else{
+                msg.reply("This command tracks the character that is being input in the command and gives us the sum of the meso spent along with the different items that are being used")
+            }
+        }
+        else if (command.length == 4){
+            if(command[1] = "record" && command[2] == "character_name" && command[3] == "item_name"){
+                msg.reply("This command tracks the amount of meso spent on a specific item for that specific character");
+            }
+        }
     }
     // $record is use to look up user's track record
 	else if (command[0] == "$record") {
