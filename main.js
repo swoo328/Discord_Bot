@@ -1,3 +1,8 @@
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+import { help } from './help.js';
+import {Record} from './record.js';
+import {track} from './track.js';
 const {Client, Intents, Message} = require('discord.js');
 const dotenv = require("dotenv");
 const fs = require("fs");
@@ -49,132 +54,151 @@ client.on("ready", () => { // Crafting reminder function
 
 // tracking cost and pain
 client.on("message", msg => {
-    command = msg.content.split(" ");
+    var command = msg.content.split(" ");
     // tracking
-    if (command[0] == "$track") {
-        if (validateTrack(command)) { // Determine what info to put in
-            ownerId = msg.author.id
-            characterName = command[1]
-            itemName = command[2]
-            mesoSpent = command[3]
-            sfEvent = ""
-            if (command.length <= 4) {
-                sfEvent = "offevent"
+        if (command[0] == "$track") {
+            // track();
+            if (validateTrack(command)) { 
+                // Determine what info to put in
+
+                var ownerId = msg.author.id
+                var characterName = command[1]
+                var itemName = command[2]
+                var mesoSpent = command[3]
+                var sfEvent = ""
+                if (command.length <= 4) {
+                    sfEvent = "offevent"
+                } else {
+                    sfEvent = command[4]
+                }
+
+                // Make SQL statement
+                statement = "INSERT INTO item (owner_id, character_name, item_name, meso_spent, event) VALUES ('" + ownerId + "','" + characterName + "', '" + itemName + "', '" + mesoSpent + "', '" + sfEvent + "')"
+
+                // Insert into Database
+                connection.query(statement, function (err, res) {
+                    if (err) 
+                        throw err
+                    
+                    msg.reply("Command is valid and is logged in the database")
+                });
+
             } else {
-                sfEvent = command[4]
+                msg.reply("Command is invalid; Please check if you put in your info correctly")
             }
-
-            // Make SQL statement
-            statement = "INSERT INTO item (owner_id, character_name, item_name, meso_spent, event) VALUES ('" + ownerId + "','" + characterName + "', '" + itemName + "', '" + mesoSpent + "', '" + sfEvent + "')"
-
-            // Insert into Database
-            connection.query(statement, function (err, res) {
-                if (err) 
-                    throw err
-                
-                msg.reply("Command is valid and is logged in the database")
-            });
-
-        } else {
-            msg.reply("Command is invalid; Please check if you put in your info correctly")
         }
-    }
     // this command gives information the other commands 
 	else if (command[0] == "$help") {
         // Display list of commands
         // length with help command
         if (command.length == 1) {
-            msg.reply("Here are the list of commands: $track\n For more information, use $help command")
-        } else if (command.length == 2) {
+            msg.reply("Here are the list of commands: $track, $record, $record $character, $record character_name , $record character_name item_name\n For more information, use $help command")
+        } 
+        else if (command.length == 2) {
             if (command[1] == "$track") {
                 msg.reply("This command tracks the amount of resources spent on an item for a character \nFormat:   $track character_name item_name meso_spent event")
-            } else if (command[1] == "$record") {
+            } 
+            else if (command[1] == "$record") {
                 msg.reply("This command tracks the user's total spending?")
             }
         }
     }
-    // looking up user's track record
-    // $record character_name_ 
+    // $record is use to look up user's track record
 	else if (command[0] == "$record") {
         if (validateRecord(command)) {
             ownerId = msg.author.id;
             if (command.length == 1) {
 				 // total meso spent with the owner id
-                botReply = "";
-                connection.query("SELECT SUM(meso_spent) AS total FROM item WHERE owner_id = " + ownerId, function (err, res) {
+                var botReply = "";
+                connection.query("SELECT character_name, SUM(meso_spent) FROM item WHERE owner_id = " + ownerId + " group by character_name", function (err, res) {
                     if (err) 
                         throw err;
                     
-                    results = JSON.parse(JSON.stringify(res));
-                    botReply = "MESO SPENT: " + results[0].total + "\n";
-                })
-                // the characters related to the owner id
-                connection.query("SELECT DISTINCT character_name FROM item WHERE owner_id = " + ownerId, function (err, res) {
-                    if (err) 
-                        throw err;
-                    
-                    character = JSON.parse(JSON.stringify(res));
-                    for (var i = 0; i < character.length; i++) {
-                        botReply += "Character Name: " + character[i]["character_name"] + "\n";
+                    var results = JSON.parse(JSON.stringify(res));
+                    let sum = 0;
+                    let character = "";
+                    //message for no records with the user's owner ID
+                    if(results.length == 0){
+                        msg.reply("There are no records in the database with your owner ID");
+                        // Record();
+                        // console.log(Record());
                     }
-                    msg.reply(botReply);
-                    // return the money spent on the character
-                });
-
-            } else if (command.length == 2) { // record character tracks the character and the amount of meso spent
+                    else{
+                        for (var i = 0; i < results.length; i++) {
+                            sum += results[i]["SUM(meso_spent)"];
+                            character +=  results[i]["character_name"] + " ," ;
+                        }
+                        //substring to get rid of the , at the end of the statement
+                        character = character.substring(0, character.length-2);
+                        botReply = "Meso Spent: " + sum + "\n" + "Character Name: " + character;
+                        msg.reply(botReply);
+                    }
+                })
+            }else if (command.length == 2) { 
+                // $record $character
+				// record character tracks the character and the amount of meso spent
                 if (command[1] == "$character") {
                     connection.query("SELECT DISTINCT character_name,SUM(meso_spent) from item WHERE owner_id = " + ownerId + " group by character_name", function (err, res) {
                         if (err) 
                             throw err;
                         
-                        characterMeso = JSON.parse(JSON.stringify(res));
-                        for (var i = 0; i < characterMeso.length; i++) {
-                            msg.reply("Character Name: " + characterMeso[i]["character_name"] + "\n" + "Meso spent: " + characterMeso[i]["SUM(meso_spent)"] + "\n")
+                        var characterMeso = JSON.parse(JSON.stringify(res));
+						var botMeso = "";
+                        // If the user doesn's have any entries in the database the bot will return a message saying 
+                        // the user doesn't have any information
+                        if(characterMeso.length == 0 ){
+                            msg.reply("There is no entries in the database.");
+                        }
+                        else{
+                            for (var i = 0; i < characterMeso.length; i++) {
+                                botMeso += "Character Name: " + characterMeso[i]["character_name"] + "\n" + "Meso spent: " + characterMeso[i]["SUM(meso_spent)"] + "\n" ;
+                            }
+                            msg.reply(botMeso);
                         }
                     })
                 }
 				else{
-					connection.query("SELECT DISTINCT character_name, SUM(meso_spent) from item WHERE owner_id = " + ownerId + " " + "AND character_name = '" + command[1] +  "' group by character_name" , function (err, res) {
+                    // $Record character_name 
+                    // Give the record of the character that is being input in the command and gives us the sum of the meso spent 
+                    // as well as the items that were being used.
+					connection.query("SELECT DISTINCT character_name, SUM(meso_spent), item_name from item WHERE owner_id = " + ownerId + " " + "AND character_name = '" + command[1] +  "' group by character_name, item_name" , function (err, res) {
 						if(err)
-							throw err;
-						characterMeso = JSON.parse(JSON.stringify(res));
-						msg.reply("Character Name: " + characterMeso[0]["character_name"] + "\n" + "Meso spent: " + characterMeso[0]["SUM(meso_spent)"] + "\n");
+                            throw err;
+						var characterMeso = JSON.parse(JSON.stringify(res));
+                        if(characterMeso.length == 0){
+                            msg.reply("There is no character name in the database");
+                        }
+                        else{
+                            let sum = 0;
+                            let items = "";
+                            for(var i = 0; i < characterMeso.length; i++){ 
+                                sum += characterMeso[i]["SUM(meso_spent)"];
+                                items += characterMeso[i]["item_name"] + ", ";
+                            }
+                            items = items.substring(0, items.length-2);
+                            msg.reply("Character Name: " + characterMeso[0]["character_name"] + "\n" + "Meso spent: " + sum + "\n" + "Items: " + items);
+                        }
 					})
 				}
             }
 			 // record item tracks the character and how much they spend on an item 
 			 // character name and item name
 			else if(command.length == 3) {
-				if(command[1] == "character" && command[2] == "items"){
-					connection.query("SELECT character_name, meso_spent, item_name from item  WHERE owner_id = " + ownerId, function (err, res) {
-						if (err) 
-							throw err;
-							characterItem = JSON.parse(JSON.stringify(res));
-							for (var i = 0; i < characterItem.length; i++) {
-								msg.reply("Item Name: " + characterItem[i]["item_name"] + "\n" + "Character Name: " + characterItem[i]["character_name"] + "\n" + "Meso spent: " + characterItem[i]["meso_spent"] + "\n")
-							}
-						})
-				}
-				else if(command[2] == "items"){
-					connection.query("SELECT character_name, item_name from item  WHERE owner_id = " + ownerId + " " + " AND character_name = '" + command[1]  + "'" , function (err, res) {
-						if (err) 
-							throw err;
-							characterItem = JSON.parse(JSON.stringify(res));
-							console.log(characterItem);
-							for (var i = 0; i < characterItem.length; i++) {
-								msg.reply("Character Name: " + characterItem[i]["character_name"] + "\n" +  "Item Name: " + characterItem[i]["item_name"] + "\n" );
-							}	
-					})
-				}
-				else{
+				//$record command[1] == character_name command[2] == item_name
+				// keeps track of meso spent on the specific item
 					connection.query("SELECT character_name, meso_spent, item_name from item  WHERE owner_id = " + ownerId + " " + " AND character_name = '" + command[1] +  "'  AND item_name = '" + command[2] + "' group by character_name", function (err, res) {
 						if (err) 
 							throw err;
 							characterItem = JSON.parse(JSON.stringify(res));
-							msg.reply("Item Name: " + characterItem[0]["item_name"] + "\n" + "Character Name: " + characterItem[0]["character_name"] + "\n" + "Meso spent: " + characterItem[0]["meso_spent"] + "\n")
-					})
-				}
-			}
+                            //if the command doesn't have the character name or item name 
+                            if(characterItem.length == 0){
+                                msg.reply("The database doesn't have the item name or character name");
+                            }
+                            else
+							    msg.reply("Item Name: " + characterItem[0]["item_name"] + "\n" + "Character Name: " + characterItem[0]["character_name"] + "\n" + "Meso spent: " + characterItem[0]["meso_spent"] + "\n")
+                            
+                    })
+			    }
 
         }
     }
