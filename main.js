@@ -92,27 +92,14 @@ client.on("message", msg => {
         // Display list of commands
         // length with help command
         if (command.length == 1) {
-            msg.reply("Here are the list of commands: $track, $record, $record $character, $record character_name , $record character_name item_name\n For more information, use $help command")
+            msg.reply("Here are the list of commands: $track, $record\n For more information, use $help command")
         } 
         else if (command.length == 2) {
             if (command[1] == "$track") {
-                msg.reply("This command tracks the amount of resources spent on an item for a character \nFormat:   $track character_name item_name meso_spent event")
+                msg.reply("The $track command tracks the amount of resources spent\n $track character_name item_name meso_spent event -> This command tracks the amount of resources spent on an item for a character\n \t\tcharacter_name -> The character name being input by the user\n \t\titem_name -> The item being input by the user\n \t\tmeso_spent -> The meso that is being input by the user for that item\n \t\tevent -> The event that is being input by the user")
             } 
             else if (command[1] == "$record") {
-                msg.reply("This command tracks the user's total spending?")
-            }
-        }
-        else if(command.length == 3){
-            if(command[1] = "record" && command[2] == "$character"){
-                msg.reply("This command tracks the user's characters and the amount of meso spent for each character");
-            }
-            else{
-                msg.reply("This command tracks the character that is being input in the command and gives us the sum of the meso spent along with the different items that are being used")
-            }
-        }
-        else if (command.length == 4){
-            if(command[1] = "record" && command[2] == "character_name" && command[3] == "item_name"){
-                msg.reply("This command tracks the amount of meso spent on a specific item for that specific character");
+                msg.reply("This $record command tracks the user's records base on the different criteria\n \t\t$record -> returns the user's total spending\n \t\t$record $character -> tracks the user's characters and the amount of meso spent for each character \n \t\t$record character_name -> tracks the character that is being input in the command and gives us the sum of the meso spent along with the different items that are being used\n \t\t$record character_name item_name -> tracks the amount of meso spent on a specific item for that specific character")
             }
         }
     }
