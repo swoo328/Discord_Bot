@@ -73,7 +73,7 @@ client.on("message", msg => {
                 }
 
                 // Make SQL statement
-                statement = "INSERT INTO item (owner_id, character_name, item_name, meso_spent, event) VALUES ('" + ownerId + "','" + characterName + "', '" + itemName + "', '" + mesoSpent + "', '" + sfEvent + "')"
+                var statement = "INSERT INTO item (owner_id, character_name, item_name, meso_spent, event) VALUES ('" + ownerId + "','" + characterName + "', '" + itemName + "', '" + mesoSpent + "', '" + sfEvent + "')"
 
                 // Insert into Database
                 connection.query(statement, function (err, res) {
@@ -186,17 +186,21 @@ client.on("message", msg => {
 			else if(command.length == 3) {
 				//$record command[1] == character_name command[2] == item_name
 				// keeps track of meso spent on the specific item
-					connection.query("SELECT character_name, meso_spent, item_name from item  WHERE owner_id = " + ownerId + " " + " AND character_name = '" + command[1] +  "'  AND item_name = '" + command[2] + "' group by character_name", function (err, res) {
+					connection.query("SELECT character_name, meso_spent, item_name from item  WHERE owner_id = " + ownerId + " " + " AND character_name = '" + command[1] +  "'  AND item_name = '" + command[2] + "' ", function (err, res) {
 						if (err) 
 							throw err;
-							characterItem = JSON.parse(JSON.stringify(res));
+							var characterItem = JSON.parse(JSON.stringify(res));
                             //if the command doesn't have the character name or item name 
                             if(characterItem.length == 0){
                                 msg.reply("The database doesn't have the item name or character name");
                             }
-                            else
-							    msg.reply("Item Name: " + characterItem[0]["item_name"] + "\n" + "Character Name: " + characterItem[0]["character_name"] + "\n" + "Meso spent: " + characterItem[0]["meso_spent"] + "\n")
-                            
+                            else{
+                                let sum = 0;
+                                for(var i = 0; i < characterItem.length; i++){
+                                    sum += characterItem[i]["meso_spent"];
+                                }
+                                msg.reply("Character Name: " + characterItem[0]["character_name"] + "\n" + "Item Name: " + characterItem[0]["item_name"] + "\n" + "Meso spent: " + sum )
+                            }
                     })
 			    }
 
@@ -222,7 +226,7 @@ function validateTrack(command) {
 
     // event
     if (command.length == 5) {
-        events = ["offevent", "5/10/15", "30%", "Shiny"]
+        var events = ["offevent", "5/10/15", "30%", "Shiny"]
         if (events.indexOf(command[4]) == -1) {
             return false
         }
