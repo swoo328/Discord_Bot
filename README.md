@@ -1,9 +1,5 @@
 # Discord_Bot
 
-# Description <a name = "description"></a>
-As a user, I want to be able to view and check out the total spending in a game. The User is able to sort, record and find out how much 
-they spend on a certain item in a game. 
-
 # Table Of Contents
 
 ## [Description](#description)
@@ -13,6 +9,10 @@ they spend on a certain item in a game.
 ## [Repository](#repository)
 
 ## [Tech Used](#tech)
+
+# Description <a name = "description"></a>
+As a user, I want to be able to view and check out the total spending in a game. The User is able to sort, record and find out how much 
+they spend on a certain item in a game.
 
 # Screenshot <a name = "screenshot"></a>
 
