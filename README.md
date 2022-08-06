@@ -11,8 +11,8 @@
 ## [Tech Used](#tech)
 
 # Description <a name = "description"></a>
-As a user, I want to be able to view and check out the total spending in a game. The User is able to sort, record and find out how much 
-they spend on a certain item in a game.
+As a user, I want to be able to view and check out my total spending in a game. The User is able to sort, record and find out how much 
+the user spend on a certain item or items in a game.
 
 # Screenshot <a name = "screenshot"></a>
 ![](Assets/discordbot.PNG)
