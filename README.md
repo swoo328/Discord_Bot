@@ -15,7 +15,7 @@ As a user, I want to be able to view and check out the total spending in a game.
 they spend on a certain item in a game.
 
 # Screenshot <a name = "screenshot"></a>
-![](assets/discordbot.PNG)
+![](Assets/discordbot.PNG)
 
 # Repository <a name = "repository"></a>
 https://github.com/swoo328/Discord_Bot
